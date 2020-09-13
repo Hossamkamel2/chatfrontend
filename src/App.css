@@ -1,4 +1,4 @@
-.App {
+/* .App {
   text-align: center;
 }
 
@@ -22,9 +22,15 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+} */
+.center {
+  margin: auto;
+  width: 50%;
+  /* border: 3px solid green; */
+  padding: 10px;
 }
 
-.App-link {
+/* .App-link {
   color: #61dafb;
 }
 
@@ -35,4 +41,4 @@
   to {
     transform: rotate(360deg);
   }
-}
+} */

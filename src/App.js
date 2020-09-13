@@ -5,7 +5,7 @@ import RegisterForm from "./components/registerForm";
 import LoginForm from "./components/loginForm";
 
 function App() {
-  return <LoginForm />;
+  return <RegisterForm />;
 }
 
 export default App;

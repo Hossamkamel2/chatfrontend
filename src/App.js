@@ -10,6 +10,7 @@ import NotFound from "./components/notfound";
 import Logout from "./components/logout";
 import { ToastContainer } from "react-toastify";
 import authService from "./services/authService";
+import MessageForm from "./components/messageForm";
 
 class App extends Component {
   state = {};
@@ -28,10 +29,14 @@ class App extends Component {
             <Route path="/logout" component={Logout} />
             <Route path="/register" component={RegisterForm} />
             <Route path="/not-found" component={NotFound} />
+            <Route path="/:id" component={MessageForm} />
             <Route
               exact
               path="/"
-              render={(props) => <Messages {...props} user={this.state.user} />}
+              render={(props) => {
+                if (!this.state.user) return <Redirect to="/login" />;
+                return <Messages {...props} user={this.state.user} />;
+              }}
             />
             <Redirect to="/not-found" />
           </Switch>

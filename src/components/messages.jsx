@@ -1,8 +1,11 @@
-import React, { Component } from "react";
+import { Link } from "react-router-dom";
+import React from "react";
 import Form from "./Form";
 import Joi from "joi-browser";
-import { getMessages, addMessage } from "./../services/messService";
-import { getCurrentUser } from "../services/authService";
+import { getMessages, deleteMessage } from "./../services/messService";
+import io from "socket.io-client";
+const ENDPOINT = "http://127.0.0.1:3000";
+const socket = io(ENDPOINT);
 
 class Messages extends Form {
   state = {
@@ -13,21 +16,42 @@ class Messages extends Form {
   schema = {
     message: Joi.string().required().label("message"),
   };
+
+  constructor() {
+    super();
+    //const { user } = this.props;
+    //this.setState({ user });
+  }
+
+  getMessages = async () => {
+    const returned = await getMessages();
+    let messList = returned.data;
+
+    this.setState({ messList });
+  };
+
   async componentDidMount() {
     const returned = await getMessages();
     let messList = returned.data;
-    //const _iid = user._id;
-    //const data = { _id: _iid, message: "" };
-    this.setState({ messList });
 
-    console.log(this.state.messList);
+    socket.on("newMessage", (data) => {
+      this.setState({ messList: [...this.state.messList, data] });
+    });
+    this.setState({ messList });
+    console.log("im here");
   }
+
   async doSubmit() {
     try {
-      await addMessage(this.state.data.message);
-      let messages = this.state.messList;
-      messages.add(this.state.data.message);
-      this.setState({ messList: messages });
+      const send = {
+        sender: this.props.user._id,
+        message: this.state.data.message,
+      };
+      socket.emit("message", send);
+      //await addMessage(this.state.data.message);
+
+      const data = { message: "" };
+      this.setState({ data });
     } catch (ex) {
       if (ex.response && ex.response.status === 400) {
         const errors = { ...this.state.errors };
@@ -36,6 +60,21 @@ class Messages extends Form {
       }
     }
   }
+  handleDelete = async (id) => {
+    try {
+      await deleteMessage(id);
+      const messList = this.state.messList.filter((mess) => mess._id !== id);
+      console.log(id);
+
+      this.setState({ messList });
+    } catch (ex) {
+      if (ex.response && ex.response.status === 400) {
+        const errors = { ...this.state.errors };
+        errors.email = ex.response.data;
+        this.setState({ errors });
+      }
+    }
+  };
 
   render() {
     const { messList } = this.state;
@@ -59,11 +98,21 @@ class Messages extends Form {
                   <h5 className="card-title">{message.sender.name}</h5>
                   <p className="card-text">{message.message}</p>
                   {user._id === message.sender._id && (
-                    <button className="btn btn-danger">Delete</button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => this.handleDelete(message._id)}
+                    >
+                      Delete
+                    </button>
                   )}
 
                   {user._id === message.sender._id && (
-                    <button className="btn btn-link">Edit</button>
+                    <Link
+                      className="m-2 btn btn-primary"
+                      to={`/${message._id}`}
+                    >
+                      Edit
+                    </Link>
                   )}
                 </div>
               </div>

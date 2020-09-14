@@ -29,6 +29,10 @@
   /* border: 3px solid green; */
   padding: 10px;
 }
+.post {
+  margin: auto;
+  padding: 10px;
+}
 
 /* .App-link {
   color: #61dafb;
